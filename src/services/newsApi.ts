@@ -4,6 +4,14 @@ import { parseRssFeed } from "./rssParser";
 
 const NEWSDATA_BASE_URL = "https://newsdata.io/api/1/news";
 
+function normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\s\u1780-\u17FF]+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * Fetch real live Cambodian news from active live Cambodian news outlets
  */
@@ -19,10 +27,34 @@ export async function fetchLiveCambodiaNews(): Promise<Article[]> {
     return MOCK_ARTICLES;
   }
 
-  // Sort by latest publication date
-  return flattened.sort(
-    (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
-  );
+  // De-duplicate articles by normalized title and link
+  const seenTitles = new Set<string>();
+  const seenLinks = new Set<string>();
+  const uniqueArticles: Article[] = [];
+
+  for (const article of flattened) {
+    const normTitle = normalizeString(article.title);
+    const cleanLink = article.link.split("?")[0].replace(/\/+$/, "").toLowerCase();
+
+    if (normTitle && seenTitles.has(normTitle)) continue;
+    if (cleanLink && seenLinks.has(cleanLink)) continue;
+
+    if (normTitle) seenTitles.add(normTitle);
+    if (cleanLink) seenLinks.add(cleanLink);
+
+    uniqueArticles.push(article);
+  }
+
+  // Cambodian national news priority, then latest publication date
+  return uniqueArticles.sort((a, b) => {
+    const aIsNational = a.source_id === "rfi-khmer" || a.category.includes("national");
+    const bIsNational = b.source_id === "rfi-khmer" || b.category.includes("national");
+
+    if (aIsNational && !bIsNational) return -1;
+    if (!aIsNational && bIsNational) return 1;
+
+    return new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime();
+  });
 }
 
 /**
@@ -35,7 +67,6 @@ export async function fetchNewsData(
 ): Promise<Article[]> {
   const apiKey = process.env.NEWSDATA_API_KEY;
 
-  // 1. If user supplied a valid NewsData.io API key, query it
   if (apiKey && !apiKey.startsWith("pub_demo") && apiKey.length > 10) {
     try {
       const params = new URLSearchParams({
@@ -69,24 +100,23 @@ export async function fetchNewsData(
         }
       }
     } catch (e) {
-      console.warn("NewsData API failed, using live Cambodian RSS feeds:", e);
+      console.warn("NewsData API fallback to live RSS feeds:", e);
     }
   }
 
-  // 2. Default: fetch real live Cambodian news from active publishers
   const liveArticles = await fetchLiveCambodiaNews();
 
   let filtered = liveArticles;
 
   if (category && category !== "all") {
     const targetCat = category.toLowerCase();
-    filtered = filtered.filter((article) =>
-      article.category.some((c) => c.toLowerCase().includes(targetCat)) ||
-      article.title.toLowerCase().includes(targetCat)
+    filtered = filtered.filter(
+      (article) =>
+        article.category.some((c) => c.toLowerCase().includes(targetCat)) ||
+        article.title.toLowerCase().includes(targetCat)
     );
-    // If specific filter returned too few results, keep broader related list
     if (filtered.length === 0) {
-      filtered = liveArticles.slice(0, 8);
+      filtered = liveArticles.slice(0, 12);
     }
   }
 
