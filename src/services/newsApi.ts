@@ -1,8 +1,23 @@
 import { Article } from "@/types/news";
 import { REAL_NEWS_SOURCES, MOCK_ARTICLES } from "@/lib/constants";
 import { parseRssFeed } from "./rssParser";
+import fs from "fs";
+import path from "path";
 
 const NEWSDATA_BASE_URL = "https://newsdata.io/api/1/news";
+const DATA_FILE = path.join(process.cwd(), "data", "custom_articles.json");
+
+function getCustomArticles(): Article[] {
+  try {
+    if (!fs.existsSync(DATA_FILE)) {
+      return [];
+    }
+    const data = fs.readFileSync(DATA_FILE, "utf-8");
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
+}
 
 function normalizeString(str: string): string {
   return str
@@ -16,6 +31,8 @@ function normalizeString(str: string): string {
  * Fetch real live Cambodian news from active live Cambodian news outlets
  */
 export async function fetchLiveCambodiaNews(): Promise<Article[]> {
+  const customArticles = getCustomArticles();
+
   const fetchPromises = REAL_NEWS_SOURCES.map((source) =>
     parseRssFeed(source.url, source.name, source.category, source.lang, source.sourceId).catch(() => [])
   );
@@ -23,14 +40,16 @@ export async function fetchLiveCambodiaNews(): Promise<Article[]> {
   const results = await Promise.all(fetchPromises);
   const flattened = results.flat();
 
-  if (flattened.length === 0) {
-    return MOCK_ARTICLES;
-  }
-
   // De-duplicate articles by normalized title and link
   const seenTitles = new Set<string>();
   const seenLinks = new Set<string>();
   const uniqueArticles: Article[] = [];
+
+  // Put custom editorial articles first
+  for (const custom of customArticles) {
+    uniqueArticles.push(custom);
+    seenTitles.add(normalizeString(custom.title));
+  }
 
   for (const article of flattened) {
     const normTitle = normalizeString(article.title);
@@ -45,8 +64,15 @@ export async function fetchLiveCambodiaNews(): Promise<Article[]> {
     uniqueArticles.push(article);
   }
 
-  // Cambodian national news priority, then latest publication date
+  if (uniqueArticles.length === 0) {
+    return MOCK_ARTICLES;
+  }
+
+  // Custom articles stay on top, then Cambodian national news, then sort by latest publication date
   return uniqueArticles.sort((a, b) => {
+    if (a.source_id === "editorial" && b.source_id !== "editorial") return -1;
+    if (b.source_id === "editorial" && a.source_id !== "editorial") return 1;
+
     const aIsNational = a.source_id === "rfi-khmer" || a.category.includes("national");
     const bIsNational = b.source_id === "rfi-khmer" || b.category.includes("national");
 
@@ -58,7 +84,7 @@ export async function fetchLiveCambodiaNews(): Promise<Article[]> {
 }
 
 /**
- * Primary fetcher for news: combines live Cambodian feeds & optional NewsData.io API
+ * Primary fetcher for news: combines custom articles, live Cambodian feeds & optional NewsData.io API
  */
 export async function fetchNewsData(
   category: string = "all",

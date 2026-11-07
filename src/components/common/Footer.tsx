@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES } from "@/lib/constants";
 import { useLanguage } from "@/context/LanguageContext";
+import { Shield } from "lucide-react";
 
 export function Footer() {
   const { locale, t } = useLanguage();
@@ -67,10 +68,15 @@ export function Footer() {
 
         <div className="pt-8 mt-8 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} Cambodia News App (NEWKHMER). {t("footer.copyright")}</p>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-5">
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition font-semibold"
+            >
+              <Shield size={13} /> Admin Portal
+            </Link>
             <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>
-            <span className="hover:text-slate-400 cursor-pointer">Contact Us</span>
           </div>
         </div>
       </div>
