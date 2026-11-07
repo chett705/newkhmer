@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { Article } from "@/types/news";
 import { Badge } from "@/components/ui/Badge";
 import { formatRelativeTime } from "@/lib/dateUtils";
-import { FALLBACK_IMAGE } from "@/lib/constants";
+import { CATEGORY_FALLBACK_IMAGES, FALLBACK_IMAGE } from "@/lib/constants";
 import { Clock } from "lucide-react";
 
 interface NewsCardProps {
@@ -11,7 +14,11 @@ interface NewsCardProps {
   featured?: boolean;
 }
 
-export function NewsCard({ article, featured = false }: NewsCardProps) {
+export function NewsCard({ article }: NewsCardProps) {
+  const cat = article.category?.[0] || "national";
+  const defaultFallback = CATEGORY_FALLBACK_IMAGES[cat] || FALLBACK_IMAGE;
+  const [imgSrc, setImgSrc] = useState(article.image_url || defaultFallback);
+
   return (
     <article className="flex flex-col h-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-gray-200/80 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-all duration-300 group">
       {/* Thumbnail */}
@@ -20,11 +27,12 @@ export function NewsCard({ article, featured = false }: NewsCardProps) {
         className="relative w-full h-48 sm:h-52 overflow-hidden bg-slate-100 dark:bg-slate-800 block"
       >
         <Image
-          src={article.image_url || FALLBACK_IMAGE}
+          src={imgSrc}
           alt={article.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={() => setImgSrc(defaultFallback)}
         />
         {article.category && article.category[0] && (
           <div className="absolute top-3 left-3">
@@ -76,4 +84,3 @@ export function NewsCard({ article, featured = false }: NewsCardProps) {
     </article>
   );
 }
-

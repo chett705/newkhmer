@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchNewsData, fetchLiveCambodiaNews } from "@/services/newsApi";
-import { MOCK_ARTICLES, FALLBACK_IMAGE } from "@/lib/constants";
+import { MOCK_ARTICLES, CATEGORY_FALLBACK_IMAGES, FALLBACK_IMAGE } from "@/lib/constants";
 import { formatKhmerDate, formatRelativeTime } from "@/lib/dateUtils";
 import { Badge } from "@/components/ui/Badge";
 import { NewsCard } from "@/components/news/NewsCard";
@@ -47,6 +47,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  const cat = article.category?.[0] || "national";
+  const displayImage = article.image_url || CATEGORY_FALLBACK_IMAGES[cat] || FALLBACK_IMAGE;
   const relatedArticles = allArticles.filter((a) => a.id !== article.id).slice(0, 3);
 
   return (
@@ -73,9 +75,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <header className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           {article.category &&
-            article.category.map((cat) => (
-              <Badge key={cat} variant="primary" className="uppercase">
-                {cat}
+            article.category.map((c) => (
+              <Badge key={c} variant="primary" className="uppercase">
+                {c}
               </Badge>
             ))}
           {article.source_name && <Badge variant="secondary">{article.source_name}</Badge>}
@@ -98,7 +100,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       {/* Featured Image */}
       <div className="relative w-full h-72 sm:h-96 md:h-[480px] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shadow-md">
         <Image
-          src={article.image_url || FALLBACK_IMAGE}
+          src={displayImage}
           alt={article.title}
           fill
           priority

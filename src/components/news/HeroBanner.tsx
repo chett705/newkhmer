@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { Article } from "@/types/news";
 import { Badge } from "@/components/ui/Badge";
 import { formatRelativeTime } from "@/lib/dateUtils";
+import { CATEGORY_FALLBACK_IMAGES, FALLBACK_IMAGE } from "@/lib/constants";
 import { Clock, ExternalLink } from "lucide-react";
 
 interface HeroBannerProps {
@@ -12,22 +16,21 @@ interface HeroBannerProps {
 export function HeroBanner({ article }: HeroBannerProps) {
   if (!article) return null;
 
+  const cat = article.category?.[0] || "national";
+  const defaultFallback = CATEGORY_FALLBACK_IMAGES[cat] || FALLBACK_IMAGE;
+  const [imgSrc, setImgSrc] = useState(article.image_url || defaultFallback);
+
   return (
     <div className="relative rounded-2xl overflow-hidden bg-slate-900 text-white shadow-xl group border border-slate-800">
       <div className="relative h-80 sm:h-96 md:h-[450px] w-full">
-        {article.image_url ? (
-          <Image
-            src={article.image_url}
-            alt={article.title}
-            fill
-            priority
-            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          />
-        ) : (
-          <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500">
-            ព័ត៌មានកម្ពុជា
-          </div>
-        )}
+        <Image
+          src={imgSrc}
+          alt={article.title}
+          fill
+          priority
+          className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+          onError={() => setImgSrc(defaultFallback)}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10" />
       </div>
 
@@ -80,4 +83,3 @@ export function HeroBanner({ article }: HeroBannerProps) {
     </div>
   );
 }
-

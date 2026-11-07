@@ -2,14 +2,24 @@ import { Category } from "@/types/news";
 
 export const CATEGORIES: Category[] = [
   { id: "all", slug: "all", nameEn: "All News", nameKm: "ទំព័រដើម", icon: "Globe" },
-  { id: "national", slug: "national", nameEn: "National", nameKm: "ព័ត៌មានជាតិ", descriptionKm: "ព្រឹត្តិការណ៍នយោបាយ និងសង្គមកម្ពុជា", icon: "Landmark" },
-  { id: "business", slug: "business", nameEn: "Business & Economy", nameKm: "សេដ្ឋកិច្ច", descriptionKm: "ទីផ្សារ ធនាគារ និងការវិនិយោគ", icon: "TrendingUp" },
-  { id: "technology", slug: "technology", nameEn: "Technology", nameKm: "បច្ចេកវិទ្យា", descriptionKm: "ឌីជីថល នវានុវត្តន៍ និងទូរស័ព្ទ", icon: "Cpu" },
-  { id: "sports", slug: "sports", nameEn: "Sports", nameKm: "កីឡា", descriptionKm: "បាល់ទាត់ គុនខ្មែរ និងព្រឹត្តិការណ៍កីឡាជាតិ-អន្តរជាតិ", icon: "Trophy" },
-  { id: "tourism", slug: "tourism", nameEn: "Tourism & Culture", nameKm: "ទេសចរណ៍ និងវប្បធម៌", descriptionKm: "តំបន់ទេសចរណ៍ ប្រាសាទបុរាណ និងវប្បធម៌ខ្មែរ", icon: "Palmtree" },
+  { id: "national", slug: "national", nameEn: "National", nameKm: "ព័ត៌មានជាតិ", descriptionKm: "ព្រឹត្តិការណ៍នយោបាយ សង្គម និងការអភិវឌ្ឍកម្ពុជា", icon: "Landmark" },
+  { id: "business", slug: "business", nameEn: "Business & Economy", nameKm: "សេដ្ឋកិច្ច", descriptionKm: "ទីផ្សារ ធនាគារ ពាណិជ្ជកម្ម និងការវិនិយោគ", icon: "TrendingUp" },
+  { id: "technology", slug: "technology", nameEn: "Technology", nameKm: "បច្ចេកវិទ្យា", descriptionKm: "ឌីជីថល បញ្ញាសិប្បនិម្មិត AI និងទូរស័ព្ទ", icon: "Cpu" },
+  { id: "sports", slug: "sports", nameEn: "Sports", nameKm: "កីឡា", descriptionKm: "គុនខ្មែរ បាល់ទាត់ និងព្រឹត្តិការណ៍កីឡាជាតិ-អន្តរជាតិ", icon: "Trophy" },
+  { id: "tourism", slug: "tourism", nameEn: "Tourism & Culture", nameKm: "ទេសចរណ៍ និងវប្បធម៌", descriptionKm: "រមណីយដ្ឋាន ប្រាសាទបុរាណ និងវប្បធម៌ខ្មែរ", icon: "Palmtree" },
 ];
 
-export const FALLBACK_IMAGE = "/images/placeholder-news.svg";
+// Curated authentic Cambodian category photos for 100% guaranteed beautiful presentation
+export const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  national: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&auto=format&fit=crop&q=80",
+  business: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&auto=format&fit=crop&q=80",
+  technology: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=80",
+  sports: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=1200&auto=format&fit=crop&q=80",
+  tourism: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&auto=format&fit=crop&q=80",
+  all: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=1200&auto=format&fit=crop&q=80",
+};
+
+export const FALLBACK_IMAGE = CATEGORY_FALLBACK_IMAGES.national;
 
 export const REAL_NEWS_SOURCES = [
   {
@@ -41,11 +51,11 @@ export const REAL_NEWS_SOURCES = [
     sourceId: "khmer-times-biz",
   },
   {
-    name: "Google News Cambodia",
-    category: "all",
+    name: "Khmer Times (Sports)",
+    category: "sports",
     lang: "en",
-    url: "https://news.google.com/rss/search?q=Cambodia&hl=en-US&gl=US&ceid=US:en",
-    sourceId: "google-news",
+    url: "https://www.khmertimeskh.com/category/sports/feed/",
+    sourceId: "khmer-times-sports",
   },
 ];
 
@@ -63,6 +73,6 @@ export const MOCK_ARTICLES = [
     source_id: "rfi-khmer",
     source_name: "RFI ខេមរភាសា",
     category: ["national"],
-    language: "km"
-  }
+    language: "km",
+  },
 ];

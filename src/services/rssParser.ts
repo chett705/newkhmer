@@ -1,5 +1,6 @@
 import { parseStringPromise } from "xml2js";
 import { Article } from "@/types/news";
+import { CATEGORY_FALLBACK_IMAGES } from "@/lib/constants";
 
 function generateHashId(str: string): string {
   let hash = 0;
@@ -55,7 +56,7 @@ export async function parseRssFeed(
       const rawContent = item["content:encoded"]?._ || item["content:encoded"] || rawDescription;
       const pubDate = item.pubDate || item.published || item.updated || new Date().toISOString();
 
-      // Extract image: Check media:thumbnail, enclosure, or regex from HTML description/content
+      // Extract image: Check media:thumbnail, enclosure, media:content, or regex from HTML
       let imageUrl: string | null = null;
       if (item["media:thumbnail"]?.$?.url) {
         imageUrl = item["media:thumbnail"].$.url;
@@ -68,6 +69,16 @@ export async function parseRssFeed(
         if (match && match[1]) {
           imageUrl = match[1];
         }
+      }
+
+      // Upgrade thumbnail to higher resolution if from Khmer Times WordPress thumbnails
+      if (imageUrl && imageUrl.includes("khmertimeskh.com")) {
+        imageUrl = imageUrl.replace(/-\d+x\d+(\.[a-zA-Z]+)$/, "$1");
+      }
+
+      // If still no image, assign category authentic Cambodian news photo
+      if (!imageUrl) {
+        imageUrl = CATEGORY_FALLBACK_IMAGES[defaultCategory] || CATEGORY_FALLBACK_IMAGES.national;
       }
 
       // Clean HTML tags from snippet
