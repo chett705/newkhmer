@@ -29,7 +29,6 @@ export const KHMER_MONTHS = [
   "ធ្នូ",
 ];
 
-// Khmer Lunar Year Animal Zodiac
 const KHMER_ZODIAC_ANIMALS = [
   "ជូត (កណ្ដុរ)",
   "ឆ្លូវ (គោ)",
@@ -47,7 +46,6 @@ const KHMER_ZODIAC_ANIMALS = [
 
 /**
  * Formats a Date object or ISO string into a rich Khmer Solar Date with Buddhist Era.
- * Example: ថ្ងៃចន្ទ ទី០៧ ខែវិច្ឆិកា ឆ្នាំ២០២៦ (ព.ស. ២៥៧០)
  */
 export function formatKhmerDate(inputDate: Date | string): string {
   const d = typeof inputDate === "string" ? new Date(inputDate) : inputDate;
@@ -57,11 +55,8 @@ export function formatKhmerDate(inputDate: Date | string): string {
   const dayNumber = toKhmerNumber(d.getDate().toString().padStart(2, "0"));
   const monthName = KHMER_MONTHS[d.getMonth()];
   const yearNumber = toKhmerNumber(d.getFullYear());
-  
-  // Buddhist Era (ព.ស.) = CE + 544 (from Visakha Bochea) or CE + 543
   const buddhistYear = toKhmerNumber(d.getFullYear() + 544);
 
-  // Zodiac approximation based on calendar year
   const zodiacIndex = (d.getFullYear() - 4) % 12;
   const zodiac = KHMER_ZODIAC_ANIMALS[zodiacIndex >= 0 ? zodiacIndex : zodiacIndex + 12];
 
@@ -69,9 +64,9 @@ export function formatKhmerDate(inputDate: Date | string): string {
 }
 
 /**
- * Returns human-readable relative time (Khmer or English)
+ * Returns human-readable relative time (Khmer, English, or Chinese)
  */
-export function formatRelativeTime(inputDate: Date | string, lang: "km" | "en" = "km"): string {
+export function formatRelativeTime(inputDate: Date | string, lang: string = "km"): string {
   const d = typeof inputDate === "string" ? new Date(inputDate) : inputDate;
   if (isNaN(d.getTime())) return "";
 
@@ -79,32 +74,37 @@ export function formatRelativeTime(inputDate: Date | string, lang: "km" | "en" =
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
   if (diffInSeconds < 60) {
-    return lang === "km" ? "ទើបតែចេញផ្សាយ" : "Just now";
+    if (lang === "zh") return "刚刚";
+    if (lang === "en") return "Just now";
+    return "ទើបតែចេញផ្សាយ";
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) {
-    return lang === "km"
-      ? `${toKhmerNumber(diffInMinutes)} នាទីមុន`
-      : `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+    if (lang === "zh") return `${diffInMinutes} 分钟前`;
+    if (lang === "en") return `${diffInMinutes}m ago`;
+    return `${toKhmerNumber(diffInMinutes)} នាទីមុន`;
   }
 
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) {
-    return lang === "km"
-      ? `${toKhmerNumber(diffInHours)} ម៉ោងមុន`
-      : `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+    if (lang === "zh") return `${diffInHours} 小时前`;
+    if (lang === "en") return `${diffInHours}h ago`;
+    return `${toKhmerNumber(diffInHours)} ម៉ោងមុន`;
   }
 
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) {
-    return lang === "km"
-      ? `${toKhmerNumber(diffInDays)} ថ្ងៃមុន`
-      : `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+    if (lang === "zh") return `${diffInDays} 天前`;
+    if (lang === "en") return `${diffInDays}d ago`;
+    return `${toKhmerNumber(diffInDays)} ថ្ងៃមុន`;
+  }
+
+  if (lang === "zh") {
+    return `${d.getMonth() + 1}月${d.getDate()}日`;
   }
 
   return lang === "km"
     ? `${toKhmerNumber(d.getDate())} ${KHMER_MONTHS[d.getMonth()]} ${toKhmerNumber(d.getFullYear())}`
     : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
-

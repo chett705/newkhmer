@@ -1,0 +1,38 @@
+{
+  "site": {
+    "title": "柬埔寨新闻",
+    "tagline": "王国最新即时动态"
+  },
+  "nav": {
+    "home": "首页",
+    "national": "国内要闻",
+    "business": "经济与商业",
+    "technology": "科技创新",
+    "sports": "体育竞技",
+    "tourism": "文旅与文化",
+    "search_placeholder": "搜索新闻、关键词..."
+  },
+  "home": {
+    "breaking_news": "突发要闻",
+    "latest_updates": "最新资讯",
+    "trending": "热点聚焦",
+    "read_more": "阅读全文",
+    "source": "来源",
+    "published": "发布于",
+    "no_news": "暂无相关新闻",
+    "retry": "重试"
+  },
+  "article": {
+    "back_to_home": "返回首页",
+    "share": "分享文章",
+    "original_source": "在原网站阅读全文",
+    "related_news": "相关推荐"
+  },
+  "footer": {
+    "about": "柬埔寨新闻网提供即时、权威的柬埔寨及东南亚地区时政、财经、科技、文旅与体育综合报道。",
+    "quick_links": "快捷导航",
+    "categories": "新闻栏目",
+    "copyright": "版权所有。"
+  }
+}
+

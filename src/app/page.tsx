@@ -3,9 +3,10 @@ import { HeroBanner } from "@/components/news/HeroBanner";
 import { NewsGrid } from "@/components/news/NewsGrid";
 import { TrendingSidebar } from "@/components/news/TrendingSidebar";
 import { BreakingTicker } from "@/components/news/BreakingTicker";
+import { CategoryPills } from "@/components/news/CategoryPills";
+import { SectionHeader } from "@/components/news/SectionHeader";
 import { MOCK_ARTICLES } from "@/lib/constants";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 interface PageProps {
   searchParams: {
@@ -20,7 +21,7 @@ export default async function HomePage({ searchParams }: PageProps) {
 
   const allArticles = await fetchLiveCambodiaNews();
 
-  // Search filter
+  // Search or category filtering
   let filtered = allArticles;
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
@@ -44,7 +45,7 @@ export default async function HomePage({ searchParams }: PageProps) {
   const heroArticle = nationalArticles[0] || allArticles[0] || MOCK_ARTICLES[0];
   const trendingArticles = allArticles.filter((a) => a.id !== heroArticle.id).slice(0, 4);
 
-  // Business and Sports specialized sections for the homepage
+  // Business and Sports specialized sections
   const businessArticles = allArticles
     .filter((a) => a.category.includes("business") || a.source_id === "khmer-times-biz")
     .slice(0, 3);
@@ -77,7 +78,7 @@ export default async function HomePage({ searchParams }: PageProps) {
         </div>
       )}
 
-      {/* 3. Hero Section: Banner + Trending Sidebar (shown on default view) */}
+      {/* 3. Hero Section: Banner + Trending Sidebar */}
       {!searchQuery && selectedCategory === "all" && (
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
           <div className="lg:col-span-2">
@@ -89,100 +90,61 @@ export default async function HomePage({ searchParams }: PageProps) {
         </section>
       )}
 
-      {/* 4. Category Filter Tabs */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-bold font-khmer text-gray-900 dark:text-white flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-600" />
-            ជ្រើសរើសតាមជំពូកព័ត៌មាន
-          </h2>
-        </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          {[
-            { id: "all", label: "ទាំងអស់" },
-            { id: "national", label: "ព័ត៌មានជាតិ" },
-            { id: "business", label: "សេដ្ឋកិច្ច" },
-            { id: "sports", label: "កីឡា" },
-            { id: "tourism", label: "ទេសចរណ៍" },
-            { id: "technology", label: "បច្ចេកវិទ្យា" },
-          ].map((cat) => {
-            const isActive = selectedCategory === cat.id;
-            return (
-              <Link
-                key={cat.id}
-                href={cat.id === "all" ? "/" : `/?category=${cat.id}`}
-                className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium font-khmer transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                    : "bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700"
-                }`}
-              >
-                {cat.label}
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      {/* 4. Category Filter Pills */}
+      <CategoryPills selectedCategory={selectedCategory} />
 
       {/* 5. Main News Grid */}
-      <section>
-        <NewsGrid
-          articles={selectedCategory === "all" && !searchQuery ? mainGridArticles : filtered}
-          title={
+      <section className="space-y-6">
+        <SectionHeader
+          titleKm={
             searchQuery
               ? "លទ្ធផលស្វែងរក"
               : selectedCategory === "all"
               ? "ព័ត៌មានសំខាន់ៗប្រចាំថ្ងៃ"
-              : `ព័ត៌មានក្នុងជំពូក`
+              : "ព័ត៌មានក្នុងជំពូក"
           }
-          subtitle="បច្ចុប្បន្នភាពចុងក្រោយបង្អស់ពីស្ថាប័នព័ត៌មានជាតិ និងអន្តរជាតិ"
+          titleEn={
+            searchQuery
+              ? "Search Results"
+              : selectedCategory === "all"
+              ? "Top Stories of the Day"
+              : "Category News"
+          }
+          subtitleKm="បច្ចុប្បន្នភាពចុងក្រោយបង្អស់ពីស្ថាប័នព័ត៌មានជាតិ និងអន្តរជាតិ"
+          subtitleEn="Up-to-the-minute reports from national and international news agencies"
+          badgeColor="bg-red-600"
+        />
+        <NewsGrid
+          articles={selectedCategory === "all" && !searchQuery ? mainGridArticles : filtered}
         />
       </section>
 
-      {/* 6. Curated Business & Economy Section (on default home) */}
+      {/* 6. Curated Business & Economy Section */}
       {!searchQuery && selectedCategory === "all" && businessArticles.length > 0 && (
         <section className="pt-6 border-t border-gray-200/80 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold font-khmer text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-emerald-600 rounded-full inline-block" />
-                សេដ្ឋកិច្ច និងធុរកិច្ច
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-khmer mt-1">
-                ទីផ្សារ ធនាគារ ការវិនិយោគ និងពាណិជ្ជកម្មកម្ពុជា
-              </p>
-            </div>
-            <Link
-              href="/category/business"
-              className="text-xs font-semibold font-khmer text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-            >
-              មើលទាំងអស់ <ArrowRight size={13} />
-            </Link>
-          </div>
+          <SectionHeader
+            titleKm="សេដ្ឋកិច្ច និងធុរកិច្ច"
+            titleEn="Business & Economy"
+            subtitleKm="ទីផ្សារ ធនាគារ ការវិនិយោគ និងពាណិជ្ជកម្មកម្ពុជា"
+            subtitleEn="Markets, banking, trade, and investments in Cambodia"
+            badgeColor="bg-emerald-600"
+            moreLink="/category/business"
+          />
           <NewsGrid articles={businessArticles} />
         </section>
       )}
 
-      {/* 7. Curated Sports Section (on default home) */}
+      {/* 7. Curated Sports Section */}
       {!searchQuery && selectedCategory === "all" && sportsArticles.length > 0 && (
         <section className="pt-6 border-t border-gray-200/80 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold font-khmer text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-red-600 rounded-full inline-block" />
-                កីឡា និងគុនខ្មែរ
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-khmer mt-1">
-                គុនខ្មែរ បាល់ទាត់ និងព្រឹត្តិការណ៍កីឡាជាតិ-អន្តរជាតិ
-              </p>
-            </div>
-            <Link
-              href="/category/sports"
-              className="text-xs font-semibold font-khmer text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-            >
-              មើលទាំងអស់ <ArrowRight size={13} />
-            </Link>
-          </div>
+          <SectionHeader
+            titleKm="កីឡា និងគុនខ្មែរ"
+            titleEn="Sports & Kun Khmer"
+            subtitleKm="គុនខ្មែរ បាល់ទាត់ និងព្រឹត្តិការណ៍កីឡាជាតិ-អន្តរជាតិ"
+            subtitleEn="Kun Khmer, football, and national martial arts tournaments"
+            badgeColor="bg-amber-600"
+            moreLink="/category/sports"
+          />
           <NewsGrid articles={sportsArticles} />
         </section>
       )}
